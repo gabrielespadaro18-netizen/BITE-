@@ -24,7 +24,7 @@ struct MainTabView: View {
 
 struct HomeView: View {
     @EnvironmentObject var app: AppState
-    @State private var path: [HomeRoute] = []
+    @State private var path = NavigationPath()
     @State private var showFlow = false
 
     var body: some View {
@@ -71,7 +71,7 @@ struct HomeView: View {
             }
             .navigationDestination(for: RecipeRoute.self) { RecipeDetailView(route: $0) }
             .sheet(isPresented: $showFlow) {
-                PlanFlowSheet(onDaily: { path.append(.daily($0)) }, onWeekly: { path.append(.weekly($0)) })
+                PlanFlowSheet(onDaily: { path.append(HomeRoute.daily($0)) }, onWeekly: { path.append(HomeRoute.weekly($0)) })
             }
         }
     }
@@ -111,7 +111,7 @@ struct HomeView: View {
             HStack {
                 Text("Recommended for you :").font(.system(size: 15, weight: .bold))
                 Spacer()
-                Button { path.append(.all) } label: {
+                Button { path.append(HomeRoute.all) } label: {
                     HStack(spacing: 2) { Text("See all"); Image(systemName: "chevron.right") }
                         .font(.system(size: 12, weight: .medium)).foregroundStyle(Color.biteGreen)
                 }
