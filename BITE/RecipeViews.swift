@@ -194,7 +194,7 @@ struct RecipesView: View {
 
     private var countries: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Select the country:").font(.system(size: 15, weight: .bold))
+            Text("Select the continent:").font(.system(size: 15, weight: .bold))
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
                 ForEach(Region.allCases, id: \.self) { region in
                     NavigationLink(value: region) {

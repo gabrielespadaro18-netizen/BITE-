@@ -46,9 +46,9 @@ struct HomeView: View {
                 Spacer(minLength: 24)
 
                 planButton
-                    .overlay(alignment: .topTrailing) {
+                    .background(alignment: .topTrailing) {
                         AppleMascot(mood: .happy, size: 74)
-                            .offset(x: 14, y: -62)
+                            .offset(x: -15, y: -70).rotationEffect(.degrees(30))
                     }
 
                 Spacer(minLength: 24)
