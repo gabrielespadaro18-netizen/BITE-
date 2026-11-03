@@ -10,9 +10,8 @@ struct RecipeImage: View {
             LinearGradient(colors: [Color(hue: recipe.hue, saturation: 0.45, brightness: 0.97),
                                     Color(hue: recipe.hue, saturation: 0.7, brightness: 0.78)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
-            Image(systemName: recipe.symbol)
-                .font(.system(size: symbolSize, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.92))
+            Text(recipe.emoji)
+                .font(.system(size: symbolSize * 1.3))
         }
         .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
     }
@@ -29,8 +28,9 @@ struct RecipeCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(recipe.name).font(.system(size: 15, weight: .bold)).foregroundStyle(.black)
                     .multilineTextAlignment(.leading)
-                Text("\(recipe.minutes)min · \(recipe.tag)").font(.system(size: 12)).foregroundStyle(.black.opacity(0.75))
-                Text("Uses \(used) \(used == 1 ? "item" : "items") you already have")
+                Text(recipe.verified ? "\(recipe.minutes)min · \(recipe.tag)" : recipe.tag)
+                    .font(.system(size: 12)).foregroundStyle(.black.opacity(0.75))
+                Text(recipe.verified ? "Uses \(used) \(used == 1 ? "item" : "items") you already have" : recipe.country)
                     .font(.system(size: 11)).foregroundStyle(.black.opacity(0.6))
             }
             Spacer(minLength: 0)
@@ -149,7 +149,7 @@ struct RecipesView: View {
             .navigationDestination(for: CountryRoute.self) { route in
                 RecipeResultsView(title: "Here’s what we found",
                                   sections: [ResultSection(title: nil,
-                                                           recipes: app.safeRecipes().filter { $0.country == route.country })])
+                                                           recipes: app.safeRecipes(includeUnverified: true).filter { $0.country == route.country })])
             }
             .toolbar(.hidden, for: .navigationBar)
         }
@@ -218,7 +218,7 @@ struct CountryListView: View {
     let region: Region
 
     private var countries: [String] {
-        let all = app.safeRecipes().filter { $0.region == region.rawValue }.map(\.country)
+        let all = app.safeRecipes(includeUnverified: true).filter { $0.region == region.rawValue }.map(\.country)
         return Array(Set(all)).sorted()
     }
 
@@ -232,7 +232,7 @@ struct CountryListView: View {
                 ForEach(countries, id: \.self) { country in
                     NavigationLink(value: CountryRoute(region: region, country: country)) {
                         HStack(spacing: 16) {
-                            Text(Flags.byCountry[country] ?? "🌍")
+                            Text(Catalog.flag(for: country))
                                 .font(.system(size: 42))
                                 .frame(width: 92, height: 80)
                                 .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white.opacity(0.7)))
@@ -275,11 +275,22 @@ struct RecipeDetailView: View {
                     Text(recipe.name).font(.system(size: 20, weight: .bold))
 
                     HStack(spacing: 12) {
-                        chip("\(recipe.minutes) min")
+                        if recipe.verified { chip("\(recipe.minutes) min") }
                         chip(recipe.tag)
-                        chip(recipe.servings == 1 ? "1 Serving" : "\(recipe.servings) Servings")
+                        if recipe.verified { chip(recipe.servings == 1 ? "1 Serving" : "\(recipe.servings) Servings") }
                     }
 
+                    if !recipe.verified {
+                        Text(recipe.blurb).font(.system(size: 14))
+                        Text("The ingredients and steps for this recipe are still being verified, so it can’t be added to your plan yet.")
+                            .font(.system(size: 13)).foregroundStyle(.secondary)
+                        if let link = recipe.sourceUrl.flatMap(URL.init(string:)) {
+                            Link("Read more", destination: link)
+                                .font(.system(size: 14, weight: .semibold)).foregroundStyle(Color.biteGreen)
+                        }
+                    }
+
+                    if recipe.verified {
                     Text("Ingredients:").font(.system(size: 16, weight: .semibold))
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(recipe.ingredients, id: \.name) { item in
@@ -288,7 +299,7 @@ struct RecipeDetailView: View {
                                     .font(.system(size: 15, weight: .semibold))
                                     .labelStyle(TintedIcon(color: .biteGreen, text: .black))
                             } else {
-                                Label("\(item.name) - buy \(item.quantity)", systemImage: "circle")
+                                Label("\(item.name) - buy \(item.amount.isEmpty ? "1" : item.amount)", systemImage: "circle")
                                     .font(.system(size: 15, weight: .semibold))
                                     .labelStyle(TintedIcon(color: .biteRed, text: .biteRed))
                             }
@@ -303,6 +314,7 @@ struct RecipeDetailView: View {
                         }
                     }
                     .padding(.leading, 8)
+                    }
                 }
                 .padding(.horizontal, 16).padding(.bottom, 24)
             }
@@ -332,7 +344,9 @@ struct RecipeDetailView: View {
 
     @ViewBuilder
     private var addButton: some View {
-        if let meal = route.meal {
+        if !recipe.verified {
+            EmptyView()
+        } else if let meal = route.meal {
             Button { add(to: meal) } label: { addPill }
         } else {
             Menu {
@@ -380,7 +394,7 @@ struct RecipePickerSheet: View {
 
     private var options: [Recipe] {
         let r = app.recommended(for: meal)
-        return r.isEmpty ? Recipe.all.filter { $0.meals.contains(meal) } : r
+        return r.isEmpty ? Recipe.all.filter { $0.verified && $0.meals.contains(meal) } : r
     }
 
     var body: some View {

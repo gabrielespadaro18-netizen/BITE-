@@ -106,12 +106,18 @@ final class AppState: ObservableObject {
     // MARK: Recipes
 
     /// Recipes that respect the profile's intolerances, allergies and diet.
-    func safeRecipes() -> [Recipe] {
+    /// Catalogue-only entries (not verified) have no allergen or diet data, so they are shown only
+    /// when the profile has no restrictions at all, and never in planning or suggestions.
+    func safeRecipes(includeUnverified: Bool = false) -> [Recipe] {
         let p = profile
+        let hasRestrictions = !p.intolerances.subtracting([Options.noIntolerances]).isEmpty
+            || !p.allergies.subtracting([Options.noAllergies]).isEmpty
+            || p.diet != Options.noPreferences
         return Recipe.all.filter { r in
-            r.intolerances.isDisjoint(with: p.intolerances)
+            if !r.verified && (!includeUnverified || hasRestrictions) { return false }
+            return r.intolerances.isDisjoint(with: p.intolerances)
                 && r.allergens.isDisjoint(with: p.allergies)
-                && (p.diet == Options.noPreferences || p.diet == "Halal" || r.diets.contains(p.diet))
+                && (p.diet == Options.noPreferences || r.diets.contains(p.diet))
         }
     }
 
@@ -165,9 +171,10 @@ final class AppState: ObservableObject {
     func search(_ query: String) -> [Recipe] {
         let q = query.trimmingCharacters(in: .whitespaces)
         guard !q.isEmpty else { return [] }
-        return safeRecipes().filter {
+        return safeRecipes(includeUnverified: true).filter {
             $0.name.localizedCaseInsensitiveContains(q) || $0.country.localizedCaseInsensitiveContains(q)
                 || $0.tag.localizedCaseInsensitiveContains(q)
+                || $0.ingredients.contains { $0.name.localizedCaseInsensitiveContains(q) }
         }
     }
 
