@@ -69,7 +69,7 @@ struct PantryView: View {
 
     private func status(_ item: PantryItem) -> String {
         if item.amount <= 0 { return "Out" }
-        return item.amount >= 3 ? "Plenty" : "Low - \(item.amount) left"
+        return item.amount >= 3 ? "Plenty - \(item.amount)" : "Low - \(item.amount) left"
     }
 }
 

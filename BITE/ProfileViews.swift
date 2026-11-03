@@ -14,37 +14,40 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 14) {
+        FillScroll {
+            VStack(spacing: 0) {
+                Spacer(minLength: 12)
                 ZStack {
-                    Circle().fill(Color.biteGreen).frame(width: 140, height: 140)
-                    Circle().fill(.black).frame(width: 128, height: 128)
-                    Circle().fill(Color.biteMint).frame(width: 116, height: 116)
-                    Text(initial).font(.system(size: 56, weight: .black)).foregroundStyle(Color.biteDark)
+                    Circle().fill(Color.biteGreen).frame(width: 148, height: 148)
+                    Circle().fill(.black).frame(width: 136, height: 136)
+                    Circle().fill(Color.biteMint).frame(width: 124, height: 124)
+                    Text(initial).font(.system(size: 60, weight: .black)).foregroundStyle(Color.biteDark)
                 }
-                .padding(.top, 8)
-                Text(app.profile.name).font(.system(size: 22, weight: .bold))
+                Spacer(minLength: 18)
+                Text(app.profile.name).font(.system(size: 24, weight: .bold))
+                Spacer(minLength: 48)
 
                 Text("Personal information:")
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 30)
+                Spacer(minLength: 14)
 
                 VStack(spacing: 0) {
                     ForEach(ProfileSection.allCases) { section in
                         NavigationLink { ProfileEditor(section: section) } label: {
                             HStack {
-                                Text(section.rawValue).font(.system(size: 13)).foregroundStyle(.black)
+                                Text(section.rawValue).font(.system(size: 14)).foregroundStyle(.black)
                                 Spacer()
                                 Text(summary(section)).font(.system(size: 12)).foregroundStyle(Color.gray).lineLimit(1)
                                 Image(systemName: "chevron.right").font(.system(size: 11)).foregroundStyle(Color.gray)
                             }
-                            .padding(.horizontal, 14).padding(.vertical, 13)
+                            .padding(.horizontal, 16).padding(.vertical, 18)
                         }
-                        if section != ProfileSection.allCases.last { Divider().padding(.leading, 14) }
+                        if section != ProfileSection.allCases.last { Divider().padding(.leading, 16) }
                     }
                 }
-                .background(CardBackground(radius: 16))
+                .background(CardBackground(radius: 18))
+                Spacer(minLength: 28)
             }
             .padding(.horizontal, 20)
         }
@@ -93,9 +96,9 @@ struct ProfileEditor: View {
         VStack(alignment: .leading) {
             switch section {
             case .goals:
-                ScrollView { GoalsPicker(selection: $app.profile.goals).padding(4) }
+                GoalsPicker(selection: $app.profile.goals)
             case .plan:
-                ScrollView { PlanForm(profile: $app.profile) }
+                PlanForm(profile: $app.profile)
             case .intolerances:
                 MultiSelectList(items: Options.intolerances, noneLabel: Options.noIntolerances,
                                 searchPrompt: "Search Food Intolerances", selection: $app.profile.intolerances)
@@ -103,7 +106,7 @@ struct ProfileEditor: View {
                 MultiSelectList(items: Options.allergies, noneLabel: Options.noAllergies,
                                 searchPrompt: "Search Food Allergies", selection: $app.profile.allergies)
             case .preferences:
-                ScrollView { DietPicker(selection: $app.profile.diet).padding(4) }
+                DietPicker(selection: $app.profile.diet)
             }
         }
         .padding(20)

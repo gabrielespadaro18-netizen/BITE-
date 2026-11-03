@@ -33,6 +33,8 @@ enum Options {
         (noPreferences, "nosign"), ("Vegetarian", "leaf"), ("Vegan", "carrot"), ("Halal", "fork.knife")
     ]
     static let cookTimes = ["< 15 Min", "15 - 30 Min", "> 30 Min"]
+    static let cravings = ["Healthy", "High Protein", "Low Carb", "Comfort food", "Family Friendly"]
+    static let weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 }
 
 struct UserProfile: Codable {
@@ -84,6 +86,9 @@ struct Recipe: Identifiable, Hashable {
     var diets: Set<String> = []
     var goals: Set<String> = []
     var costPerServing: Double = 3
+    var region = ""
+    var country = ""
+    var vibes: Set<String> = []
 }
 
 private func ing(_ name: String, _ qty: Int = 1, _ cat: String) -> Ingredient {
@@ -91,7 +96,7 @@ private func ing(_ name: String, _ qty: Int = 1, _ cat: String) -> Ingredient {
 }
 
 extension Recipe {
-    static let all: [Recipe] = [
+    private static let base: [Recipe] = [
         Recipe(id: "chicken-zucchini-bowl", name: "Chicken & zucchini rice bowl", minutes: 25, tag: "High Protein",
                servings: 2, symbol: "fork.knife", hue: 0.10, meals: [.lunch, .dinner],
                ingredients: [ing("Chicken breast", 1, Category.meat), ing("Rice", 1, Category.grains), ing("Zucchini", 2, Category.produce)],
@@ -162,8 +167,52 @@ extension Recipe {
                ingredients: [ing("Almonds", 1, Category.misc), ing("Dates", 1, Category.produce), ing("Oats", 1, Category.grains)],
                steps: ["Blitz almonds and dates in a food processor.", "Add oats and pulse to combine.", "Roll into balls and chill."],
                intolerances: ["Gluten", "Fructose"], allergens: ["Tree Nuts"], diets: ["Vegan", "Vegetarian", "Halal"],
-               goals: ["Eat Healthier", "Try News"], costPerServing: 1.8)
+               goals: ["Eat Healthier", "Try News"], costPerServing: 1.8),
+        Recipe(id: "black-bean-rice", name: "Brazilian black bean rice", minutes: 25, tag: "Comfort",
+               servings: 2, symbol: "flame", hue: 0.07, meals: [.lunch, .dinner],
+               ingredients: [ing("Black beans", 1, Category.grains), ing("Rice", 1, Category.grains), ing("Onion", 1, Category.produce)],
+               steps: ["Sauté the onion until soft.", "Add the beans and a splash of water, simmer 10 minutes.", "Serve over warm rice."],
+               diets: ["Vegan", "Vegetarian", "Halal"], goals: ["Budget Friendly", "High Protein", "Eat Healthier"], costPerServing: 1.2),
+        Recipe(id: "quinoa-bowl", name: "Peruvian quinoa veggie bowl", minutes: 20, tag: "Fresh",
+               servings: 2, symbol: "leaf.fill", hue: 0.38, meals: [.lunch],
+               ingredients: [ing("Quinoa", 1, Category.grains), ing("Avocado", 1, Category.produce), ing("Tomatoes", 2, Category.produce)],
+               steps: ["Cook the quinoa and let it cool a little.", "Dice the avocado and tomatoes.", "Combine with lime juice and serve."],
+               intolerances: ["Histamine"], diets: ["Vegan", "Vegetarian", "Halal"],
+               goals: ["Eat Healthier", "Try News", "High Protein"], costPerServing: 3),
+        Recipe(id: "teriyaki-salmon", name: "Japanese salmon rice bowl", minutes: 25, tag: "High Protein",
+               servings: 2, symbol: "fish", hue: 0.58, meals: [.lunch, .dinner],
+               ingredients: [ing("Salmon fillet", 2, Category.meat), ing("Rice", 1, Category.grains), ing("Broccoli", 1, Category.produce)],
+               steps: ["Pan-sear the salmon, skin side down first.", "Steam the broccoli and cook the rice.", "Assemble the bowl and glaze with teriyaki sauce."],
+               allergens: ["Fish", "Soy"], diets: ["Halal"], goals: ["High Protein", "Try News", "Eat Healthier"], costPerServing: 6)
     ]
+
+    private static let meta: [String: (region: String, country: String, vibes: Set<String>)] = [
+        "chicken-zucchini-bowl": ("Europe", "Italy", ["Family Friendly"]),
+        "veggie-omelette": ("Europe", "France", []),
+        "apple-oats": ("Europe", "Germany", ["Family Friendly"]),
+        "tomato-spaghetti": ("Europe", "Italy", ["Comfort food", "Family Friendly"]),
+        "yogurt-fruit": ("Europe", "Greece", ["Family Friendly"]),
+        "lentil-soup": ("Asia", "India", ["Comfort food"]),
+        "salmon-veg": ("Europe", "Norway", []),
+        "pb-banana-toast": ("South America", "Brazil", ["Family Friendly"]),
+        "chickpea-salad": ("Africa", "Morocco", []),
+        "shakshuka": ("Africa", "Tunisia", ["Comfort food"]),
+        "tofu-stirfry": ("Asia", "China", ["Family Friendly"]),
+        "almond-bites": ("Africa", "Egypt", []),
+        "black-bean-rice": ("South America", "Brazil", ["Comfort food", "Family Friendly"]),
+        "quinoa-bowl": ("South America", "Peru", []),
+        "teriyaki-salmon": ("Asia", "Japan", [])
+    ]
+
+    static let all: [Recipe] = base.map { recipe in
+        var r = recipe
+        if let m = meta[r.id] {
+            r.region = m.region
+            r.country = m.country
+            r.vibes = m.vibes
+        }
+        return r
+    }
 
     static func find(_ id: String) -> Recipe? { all.first { $0.id == id } }
 }
@@ -182,4 +231,63 @@ enum SeedData {
          ShoppingItem(name: "Rice", category: Category.grains),
          ShoppingItem(name: "Spaghetti", category: Category.grains, checked: true)]
     }
+}
+
+
+// MARK: - Navigation values and plan requests
+
+enum Region: String, CaseIterable, Hashable {
+    case europe = "Europe", asia = "Asia", africa = "Africa", southAmerica = "South America"
+
+    var symbol: String {
+        switch self {
+        case .europe: return "building.columns.fill"
+        case .asia: return "globe.asia.australia.fill"
+        case .africa: return "globe.europe.africa.fill"
+        case .southAmerica: return "globe.americas.fill"
+        }
+    }
+}
+
+enum Flags {
+    static let byCountry = [
+        "Italy": "🇮🇹", "France": "🇫🇷", "Germany": "🇩🇪", "Greece": "🇬🇷", "Norway": "🇳🇴",
+        "India": "🇮🇳", "China": "🇨🇳", "Japan": "🇯🇵",
+        "Morocco": "🇲🇦", "Tunisia": "🇹🇳", "Egypt": "🇪🇬",
+        "Brazil": "🇧🇷", "Peru": "🇵🇪"
+    ]
+}
+
+struct RecipeRoute: Hashable {
+    let recipe: Recipe
+    var meal: MealType? = nil
+}
+
+struct CountryRoute: Hashable {
+    let region: Region
+    let country: String
+}
+
+struct DailyRequest: Hashable {
+    var minutes: Int? = nil          // index into Options.cookTimes
+    var meal: MealType? = nil
+    var cravings: Set<String> = []
+    var usePantry = true
+}
+
+struct WeeklyRequest: Hashable {
+    var days = 7
+    var meals: [Int: Set<MealType>] = [:]
+    var cravings: Set<String> = []
+    var usePantry = true
+
+    var chosenMeals: [MealType] {
+        MealType.allCases.filter { meal in (0..<days).contains { meals[$0]?.contains(meal) == true } }
+    }
+}
+
+enum HomeRoute: Hashable {
+    case daily(DailyRequest)
+    case weekly(WeeklyRequest)
+    case all
 }

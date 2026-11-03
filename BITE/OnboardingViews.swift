@@ -78,14 +78,17 @@ struct OnboardingFlow: View {
                          onBack: { go(-1) }, onContinue: { go(1) }) {
             VStack {
                 Spacer()
-                TextField("Name", text: $app.profile.name)
+                TextField("", text: $app.profile.name,
+                          prompt: Text("Name").foregroundStyle(Color(white: 0.4)))
                     .multilineTextAlignment(.center)
-                    .font(.system(size: 15))
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.black)
                     .textInputAutocapitalization(.words)
-                    .padding(.vertical, 14)
-                    .frame(maxWidth: 220)
-                    .background(Capsule().fill(Color(white: 0.96))
-                        .shadow(color: .black.opacity(0.1), radius: 5, y: 3))
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: 280)
+                    .background(Capsule().fill(Color.white)
+                        .shadow(color: .black.opacity(0.18), radius: 8, y: 4))
+                    .overlay(Capsule().stroke(Color.biteGreen, lineWidth: 2))
                 Spacer()
             }
         }
@@ -95,7 +98,7 @@ struct OnboardingFlow: View {
         QuestionScaffold(title: "What are your goals?", progress: progress,
                          canContinue: !app.profile.goals.isEmpty,
                          onBack: { go(-1) }, onContinue: { go(1) }) {
-            ScrollView { GoalsPicker(selection: $app.profile.goals).padding(4) }
+            GoalsPicker(selection: $app.profile.goals)
         }
     }
 
@@ -103,7 +106,7 @@ struct OnboardingFlow: View {
         QuestionScaffold(title: "Let’s create your plan!", progress: progress,
                          canContinue: app.profile.cookTime != nil,
                          onBack: { go(-1) }, onContinue: { go(1) }) {
-            ScrollView { PlanForm(profile: $app.profile) }
+            PlanForm(profile: $app.profile)
         }
     }
 
@@ -128,7 +131,7 @@ struct OnboardingFlow: View {
     private var dietQuestion: some View {
         QuestionScaffold(title: "Any diet preferences?", progress: progress,
                          onBack: { go(-1) }, onContinue: { go(1) }) {
-            ScrollView { DietPicker(selection: $app.profile.diet).padding(4) }
+            DietPicker(selection: $app.profile.diet)
         }
     }
 
@@ -189,118 +192,7 @@ struct QuestionScaffold<Content: View>: View {
     }
 }
 
-// MARK: - Reusable pickers
-
-struct GoalsPicker: View {
-    @Binding var selection: Set<String>
-
-    var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            ForEach(Options.goals, id: \.label) { goal in
-                let on = selection.contains(goal.label)
-                Button {
-                    if on { selection.remove(goal.label) } else { selection.insert(goal.label) }
-                } label: {
-                    VStack(spacing: 8) {
-                        Image(systemName: goal.icon).font(.system(size: 26))
-                        Text(goal.label).font(.system(size: 11, weight: .bold))
-                    }
-                    .foregroundStyle(on ? Color.white : Color.biteGreen)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 100)
-                    .background(CardBackground(selected: on))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-}
-
-struct DietPicker: View {
-    @Binding var selection: String
-
-    var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            ForEach(Options.diets, id: \.label) { diet in
-                let on = selection == diet.label
-                Button { selection = diet.label } label: {
-                    VStack(spacing: 8) {
-                        Image(systemName: diet.icon).font(.system(size: 26))
-                        Text(diet.label).font(.system(size: 11, weight: .bold))
-                    }
-                    .foregroundStyle(on ? Color.white : Color.biteGreen)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 100)
-                    .background(CardBackground(selected: on))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-}
-
-struct PlanForm: View {
-    @Binding var profile: UserProfile
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Weekly food budget").font(.system(size: 15, weight: .semibold))
-                (Text("€\(Int(profile.weeklyBudget))").foregroundStyle(Color.biteGreen)
-                 + Text(" / week"))
-                    .font(.system(size: 30, weight: .bold))
-                Slider(value: $profile.weeklyBudget, in: 20...100, step: 5)
-                    .tint(Color.biteGreen)
-                HStack {
-                    Text("20€"); Spacer(); Text("100€")
-                }
-                .font(.system(size: 11)).foregroundStyle(.secondary)
-            }
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("People you cook for").font(.system(size: 15, weight: .semibold))
-                HStack(spacing: 28) {
-                    Spacer()
-                    stepButton("minus") { profile.people = max(1, profile.people - 1) }
-                    Text("\(profile.people)").font(.system(size: 28, weight: .semibold))
-                        .frame(minWidth: 40)
-                    stepButton("plus") { profile.people = min(12, profile.people + 1) }
-                    Spacer()
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Cooking time per meal").font(.system(size: 15, weight: .semibold))
-                HStack(spacing: 10) {
-                    ForEach(Options.cookTimes.indices, id: \.self) { i in
-                        let on = profile.cookTime == i
-                        Button { profile.cookTime = i } label: {
-                            Text(Options.cookTimes[i])
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(on ? Color.white : Color.black)
-                                .padding(.horizontal, 14).padding(.vertical, 9)
-                                .background(Capsule().fill(on ? Color.biteGreen : Color(white: 0.96))
-                                    .shadow(color: .black.opacity(0.1), radius: 4, y: 2))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-        }
-        .padding(.horizontal, 4)
-        .padding(.vertical, 8)
-    }
-
-    private func stepButton(_ icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(.black)
-                .frame(width: 38, height: 38)
-                .background(Circle().fill(Color(white: 0.96)).shadow(color: .black.opacity(0.1), radius: 4, y: 2))
-        }
-    }
-}
+// MARK: - Multi-select list
 
 struct MultiSelectList: View {
     let items: [String]

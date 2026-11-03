@@ -36,6 +36,7 @@ struct PlanView: View {
                 .padding(.vertical, 8)
             }
             .toolbar(.hidden, for: .navigationBar)
+            .navigationDestination(for: RecipeRoute.self) { RecipeDetailView(route: $0) }
             .sheet(item: $pickerMeal) { meal in
                 RecipePickerSheet(meal: meal, date: selected)
             }
@@ -77,35 +78,32 @@ struct PlanView: View {
         if let d = cal.date(byAdding: .day, value: days, to: selected) { selected = d }
     }
 
-    @ViewBuilder
     private func mealSection(_ meal: MealType) -> some View {
         let items = app.planned(on: selected, meal: meal)
-        VStack(alignment: .leading, spacing: 10) {
+        return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text("\(meal.rawValue):").font(.system(size: 18, weight: .bold))
                 Spacer()
-                if !items.isEmpty || meal == .snack {
-                    Button { pickerMeal = meal } label: {
-                        Label("Add \(meal.rawValue)", systemImage: "plus")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 12).padding(.vertical, 7)
-                            .background(Capsule().fill(Color.biteGreen))
-                    }
-                }
-            }
-            if items.isEmpty && meal != .snack {
                 Button { pickerMeal = meal } label: {
                     Label("Add \(meal.rawValue)", systemImage: "plus")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity).frame(height: 44)
+                        .padding(.horizontal, 12).padding(.vertical, 7)
                         .background(Capsule().fill(Color.biteGreen))
                 }
             }
+            .frame(height: 34)
+
+            if items.isEmpty {
+                Text("Nothing planned yet")
+                    .font(.system(size: 13)).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity).frame(height: 64)
+                    .background(RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(Color.biteGreen.opacity(0.5), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5])))
+            }
             ForEach(items) { recipe in
                 HStack(spacing: 8) {
-                    NavigationLink { RecipeDetailView(recipe: recipe) } label: { RecipeCard(recipe: recipe) }
+                    NavigationLink(value: RecipeRoute(recipe: recipe)) { RecipeCard(recipe: recipe) }
                         .buttonStyle(.plain)
                     Button { app.removeFromPlan(recipe, meal: meal, date: selected) } label: {
                         Image(systemName: "xmark.circle.fill").font(.system(size: 22)).foregroundStyle(.secondary)
