@@ -7,6 +7,10 @@ enum Catalog {
     private static let areasById: [String: WTArea] =
         Dictionary(DatabaseData.areas.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
 
+    /// The team treats the 68 drafts in DraftData.swift as verified for now (the app is not on the App Store).
+    /// Set to false before release to bring back the "Draft" banner and hide drafts from users with dietary restrictions.
+    static let treatDraftsAsVerified = true
+
     static let recipes: [Recipe] = DatabaseData.recipes.map(make)
 
     // MARK: Structured tags and drafts (DraftData.swift)
@@ -223,9 +227,9 @@ enum Catalog {
 
         var recipe = Recipe(id: r.id, name: r.name, minutes: hasContent ? minutes : 0, tag: label(r.category),
                             servings: servings, emoji: r.imageEmoji, hue: Double(hash % 100) / 100,
-                            blurb: r.description, verified: verified, sourceUrl: r.sourceUrl,
+                            blurb: r.description, verified: verified || (draft != nil && treatDraftsAsVerified), sourceUrl: r.sourceUrl,
                             meals: mealTypes(r.category), ingredients: ingredients, steps: steps)
-        recipe.draft = draft != nil
+        recipe.draft = draft != nil && !treatDraftsAsVerified
         recipe.allergens = allergens
         recipe.intolerances = intolerances
         recipe.diets = diets
