@@ -304,8 +304,9 @@ struct RecipeDetailView: View {
                     Text("Ingredients:").font(.system(size: 16, weight: .semibold))
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(recipe.ingredients, id: \.name) { item in
-                            if app.pantryHas(item.name) {
-                                Label("\(item.name) - in your pantry", systemImage: "checkmark.circle.fill")
+                            if app.pantryHas(item.name) || app.isBought(item.name) {
+                                Label(app.pantryHas(item.name) ? "\(item.name) - in your pantry" : "\(item.name) - bought",
+                                      systemImage: "checkmark.circle.fill")
                                     .font(.system(size: 15, weight: .semibold))
                                     .labelStyle(TintedIcon(color: .biteGreen, text: .black))
                             } else {

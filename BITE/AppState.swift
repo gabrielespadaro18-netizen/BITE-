@@ -89,6 +89,11 @@ final class AppState: ObservableObject {
         shopping.append(ShoppingItem(name: clean, category: category, quantity: quantity))
     }
 
+    /// Ticked off in the shopping list (bought, not yet moved to the pantry).
+    func isBought(_ name: String) -> Bool {
+        shopping.contains { $0.checked && $0.name.lowercased() == name.lowercased() }
+    }
+
     func isInShopping(_ name: String) -> Bool {
         shopping.contains { !$0.checked && $0.name.lowercased() == name.lowercased() }
     }
