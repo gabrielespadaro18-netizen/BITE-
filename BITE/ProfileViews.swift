@@ -36,8 +36,8 @@ struct ProfileView: View {
                             HStack {
                                 Text(section.rawValue).font(.system(size: 13)).foregroundStyle(.black)
                                 Spacer()
-                                Text(summary(section)).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
-                                Image(systemName: "chevron.right").font(.system(size: 11)).foregroundStyle(.secondary)
+                                Text(summary(section)).font(.system(size: 12)).foregroundStyle(Color.gray).lineLimit(1)
+                                Image(systemName: "chevron.right").font(.system(size: 11)).foregroundStyle(Color.gray)
                             }
                             .padding(.horizontal, 14).padding(.vertical, 13)
                         }
