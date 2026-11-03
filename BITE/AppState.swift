@@ -89,6 +89,20 @@ final class AppState: ObservableObject {
         shopping.append(ShoppingItem(name: clean, category: category, quantity: quantity))
     }
 
+    func isInShopping(_ name: String) -> Bool {
+        shopping.contains { !$0.checked && $0.name.lowercased() == name.lowercased() }
+    }
+
+    /// Adds the ingredient to the shopping list, or removes it again if it is already there.
+    func toggleShopping(ingredient: Ingredient) {
+        if let i = shopping.firstIndex(where: { !$0.checked && $0.name.lowercased() == ingredient.name.lowercased() }) {
+            shopping.remove(at: i)
+        } else {
+            shopping.append(ShoppingItem(name: ingredient.name, category: ingredient.category, quantity: ingredient.quantity,
+                                         amount: ingredient.amount.isEmpty ? nil : ingredient.amount))
+        }
+    }
+
     func toggleShopping(_ item: ShoppingItem) {
         guard let i = shopping.firstIndex(where: { $0.id == item.id }) else { return }
         shopping[i].checked.toggle()

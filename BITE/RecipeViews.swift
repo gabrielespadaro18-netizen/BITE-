@@ -309,9 +309,16 @@ struct RecipeDetailView: View {
                                     .font(.system(size: 15, weight: .semibold))
                                     .labelStyle(TintedIcon(color: .biteGreen, text: .black))
                             } else {
-                                Label("\(item.name) - buy \(item.amount.isEmpty ? "some" : item.amount)", systemImage: "circle")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .labelStyle(TintedIcon(color: .biteRed, text: .biteRed))
+                                let added = app.isInShopping(item.name)
+                                Button { app.toggleShopping(ingredient: item) } label: {
+                                    Label(added ? "\(item.name) - in your shopping list"
+                                                : "\(item.name) - buy \(item.amount.isEmpty ? "some" : item.amount)",
+                                          systemImage: added ? "cart.fill.badge.plus" : "circle")
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .labelStyle(TintedIcon(color: added ? .biteGreen : .biteRed,
+                                                               text: added ? .biteGreen : .biteRed))
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
