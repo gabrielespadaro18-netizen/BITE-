@@ -28,9 +28,9 @@ struct RecipeCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(recipe.name).font(.system(size: 15, weight: .bold)).foregroundStyle(.black)
                     .multilineTextAlignment(.leading)
-                Text(recipe.verified ? "\(recipe.minutes)min · \(recipe.tag)" : recipe.tag)
+                Text(recipe.hasContent ? "\(recipe.minutes)min · \(recipe.tag)" : recipe.tag)
                     .font(.system(size: 12)).foregroundStyle(.black.opacity(0.75))
-                Text(recipe.verified ? "Uses \(used) \(used == 1 ? "item" : "items") you already have" : recipe.country)
+                Text(recipe.hasContent ? "Uses \(used) \(used == 1 ? "item" : "items") you already have" : recipe.country)
                     .font(.system(size: 11)).foregroundStyle(.black.opacity(0.6))
             }
             Spacer(minLength: 0)
@@ -275,12 +275,22 @@ struct RecipeDetailView: View {
                     Text(recipe.name).font(.system(size: 20, weight: .bold))
 
                     HStack(spacing: 12) {
-                        if recipe.verified { chip("\(recipe.minutes) min") }
+                        if recipe.hasContent { chip("\(recipe.minutes) min") }
                         chip(recipe.tag)
-                        if recipe.verified { chip(recipe.servings == 1 ? "1 Serving" : "\(recipe.servings) Servings") }
+                        if recipe.hasContent { chip(recipe.servings == 1 ? "1 Serving" : "\(recipe.servings) Servings") }
                     }
 
-                    if !recipe.verified {
+                    if recipe.draft {
+                        Label("Draft recipe — not yet verified by World Table. Check allergens and quantities yourself.",
+                              systemImage: "exclamationmark.triangle.fill")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color.orange)
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Color.orange.opacity(0.12)))
+                    }
+
+                    if !recipe.hasContent {
                         Text(recipe.blurb).font(.system(size: 14))
                         Text("The ingredients and steps for this recipe are still being verified, so it can’t be added to your plan yet.")
                             .font(.system(size: 13)).foregroundStyle(.secondary)
@@ -290,7 +300,7 @@ struct RecipeDetailView: View {
                         }
                     }
 
-                    if recipe.verified {
+                    if recipe.hasContent {
                     Text("Ingredients:").font(.system(size: 16, weight: .semibold))
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(recipe.ingredients, id: \.name) { item in
@@ -299,7 +309,7 @@ struct RecipeDetailView: View {
                                     .font(.system(size: 15, weight: .semibold))
                                     .labelStyle(TintedIcon(color: .biteGreen, text: .black))
                             } else {
-                                Label("\(item.name) - buy \(item.amount.isEmpty ? "1" : item.amount)", systemImage: "circle")
+                                Label("\(item.name) - buy \(item.amount.isEmpty ? "some" : item.amount)", systemImage: "circle")
                                     .font(.system(size: 15, weight: .semibold))
                                     .labelStyle(TintedIcon(color: .biteRed, text: .biteRed))
                             }
@@ -344,7 +354,7 @@ struct RecipeDetailView: View {
 
     @ViewBuilder
     private var addButton: some View {
-        if !recipe.verified {
+        if !recipe.hasContent {
             EmptyView()
         } else if let meal = route.meal {
             Button { add(to: meal) } label: { addPill }
@@ -394,7 +404,7 @@ struct RecipePickerSheet: View {
 
     private var options: [Recipe] {
         let r = app.recommended(for: meal)
-        return r.isEmpty ? Recipe.all.filter { $0.verified && $0.meals.contains(meal) } : r
+        return r.isEmpty ? Recipe.all.filter { $0.hasContent && $0.meals.contains(meal) } : r
     }
 
     var body: some View {

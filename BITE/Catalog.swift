@@ -9,6 +9,77 @@ enum Catalog {
 
     static let recipes: [Recipe] = DatabaseData.recipes.map(make)
 
+    // MARK: Structured tags and drafts (DraftData.swift)
+
+    private struct Tags {
+        var allergens: Set<String>
+        var intolerances: Set<String>
+        var diets: Set<String>
+        var cost: Double
+        var goals: Set<String>
+    }
+
+    private static let allergenNames = ["milk": "Milk", "eggs": "Eggs", "wheat": "Wheat", "peanuts": "Peanuts",
+                                        "treenuts": "Tree Nuts", "soy": "Soy", "fish": "Fish",
+                                        "shellfish": "Shellfish", "sesame": "Sesame"]
+    private static let intoleranceNames = ["gluten": "Gluten", "lactose": "Lactose", "histamine": "Histamine",
+                                           "fructose": "Fructose", "sorbitol": "Sorbitol", "caffeine": "Caffeine",
+                                           "sulfites": "Sulfites"]
+    private static let dietNames = ["veg": "Vegetarian", "vegan": "Vegan", "halal": "Halal"]
+    private static let goalNames = ["H": "High Protein", "L": "Low Carb", "E": "Eat Healthier", "B": "Budget Friendly"]
+
+    private static func list(_ field: String, _ names: [String: String]) -> Set<String> {
+        Set(field.split(separator: ",").compactMap { names[String($0).trimmingCharacters(in: .whitespaces)] })
+    }
+
+    private static let tagTable: [String: Tags] = {
+        var out: [String: Tags] = [:]
+        for line in DraftData.tags.split(separator: "\n") {
+            let f = line.split(separator: "|", omittingEmptySubsequences: false).map(String.init)
+            guard f.count == 6 else { continue }
+            var diets = list(f[3], dietNames)
+            if diets.contains("Vegan") { diets.insert("Vegetarian") }
+            out[f[0]] = Tags(allergens: list(f[1], allergenNames), intolerances: list(f[2], intoleranceNames),
+                             diets: diets, cost: Double(f[4]) ?? 3, goals: list(f[5], goalNames))
+        }
+        return out
+    }()
+
+    private struct Draft {
+        var minutes: Int
+        var servings: Int
+        var ingredients: [Ingredient]
+        var steps: [String]
+    }
+
+    private static let draftTable: [String: Draft] = {
+        var out: [String: Draft] = [:]
+        let cats = ["p": Category.produce, "d": Category.dairy, "g": Category.grains, "m": Category.meat, "x": Category.misc]
+        for line in DraftData.drafts.split(separator: "\n") {
+            let f = line.split(separator: "|", maxSplits: 4, omittingEmptySubsequences: false).map(String.init)
+            guard f.count == 5 else { continue }
+            let ingredients: [Ingredient] = f[3].split(separator: ";").compactMap { raw in
+                var text = raw.trimmingCharacters(in: .whitespaces)
+                guard !text.isEmpty else { return nil }
+                var cat = Category.misc
+                if let tilde = text.lastIndex(of: "~") {
+                    cat = cats[String(text[text.index(after: tilde)...])] ?? Category.misc
+                    text = String(text[..<tilde])
+                }
+                var amount = ""
+                var name = text
+                if let colon = text.firstIndex(of: ":") {
+                    amount = String(text[..<colon]).trimmingCharacters(in: .whitespaces)
+                    name = String(text[text.index(after: colon)...]).trimmingCharacters(in: .whitespaces)
+                }
+                return Ingredient(name: name, quantity: 1, amount: amount, category: cat)
+            }
+            let steps = f[4].components(separatedBy: " // ").map { $0.trimmingCharacters(in: .whitespaces) }
+            out[f[0]] = Draft(minutes: Int(f[1]) ?? 0, servings: Int(f[2]) ?? 1, ingredients: ingredients, steps: steps)
+        }
+        return out
+    }()
+
     static func flag(for countryName: String) -> String {
         guard let c = DatabaseData.countries.first(where: { $0.name == countryName }) else { return "🌍" }
         return c.emojiFlag ?? c.imageEmoji
@@ -85,24 +156,35 @@ enum Catalog {
         let country = countriesById[r.countryId]
         let area = country.flatMap { areasById[$0.areaId] }
         let verified = r.isComplete
+        let tags = tagTable[r.id]
+        let draft = verified ? nil : draftTable[r.id]
 
-        let ingredients: [Ingredient] = (r.ingredients ?? [])
+        var ingredients: [Ingredient] = (r.ingredients ?? [])
             .sorted { ($0.displayOrder ?? 0) < ($1.displayOrder ?? 0) }
             .map { Ingredient(name: $0.name, quantity: 1, amount: amountText($0), category: shoppingCategory($0.name)) }
-        let steps = (r.steps ?? []).sorted { $0.stepNumber < $1.stepNumber }.map(\.instruction)
+        var steps = (r.steps ?? []).sorted { $0.stepNumber < $1.stepNumber }.map(\.instruction)
+        var minutes = r.totalTimeMinutes ?? ((r.prepTimeMinutes ?? 0) + (r.cookingTimeMinutes ?? 0))
+        var servings = r.servings
+        if let draft {
+            ingredients = draft.ingredients
+            steps = draft.steps
+            minutes = draft.minutes
+            servings = draft.servings
+        }
+        let hasContent = verified || draft != nil
 
-        let minutes = r.totalTimeMinutes ?? ((r.prepTimeMinutes ?? 0) + (r.cookingTimeMinutes ?? 0))
         let names = ingredients.map { $0.name.lowercased() }.joined(separator: " | ")
         let allergyText = (r.allergens ?? []).joined(separator: " ").lowercased()
         let title = r.name.lowercased()
 
-        var allergens = Set<String>()
-        var intolerances = Set<String>()
-        var diets = Set<String>()
-        var goals = Set<String>()
+        var allergens = tags?.allergens ?? []
+        var intolerances = tags?.intolerances ?? []
+        var diets = tags?.diets ?? []
+        var goals = tags?.goals ?? []
         var vibes = Set<String>()
 
         if verified {
+            // Safety net: never lose an allergen the database itself mentions.
             if has(allergyText, ["gluten", "wheat"]) { allergens.insert("Wheat"); intolerances.insert("Gluten") }
             if has(allergyText, ["dairy", "milk", "butter", "cheese", "cream", "yogurt", "parmigiano", "mozzarella"]) {
                 allergens.insert("Milk"); intolerances.insert("Lactose")
@@ -114,46 +196,42 @@ enum Catalog {
             if has(allergyText, ["fish", "anchov", "bonito"]) { allergens.insert("Fish") }
             if has(allergyText, ["shellfish", "shrimp", "prawn", "crab", "crustacean", "mollus"]) { allergens.insert("Shellfish") }
             if allergyText.contains("sesame") { allergens.insert("Sesame") }
-            if has(allergyText, ["sulphite", "sulfite"]) || has(names, ["wine"]) { intolerances.insert("Sulfites") }
-            if has(names, histamineWords) { intolerances.insert("Histamine") }
-            if has(names, fructoseWords) { intolerances.insert("Fructose") }
-            if has(names, sorbitolWords) { intolerances.insert("Sorbitol") }
-            if has(names, caffeineWords) { intolerances.insert("Caffeine") }
-
+            if has(allergyText, ["sulphite", "sulfite"]) { intolerances.insert("Sulfites") }
             let labels = r.dietaryLabels ?? []
             if labels.contains("vegan") { diets.formUnion(["Vegan", "Vegetarian"]) }
             if labels.contains("vegetarian") { diets.insert("Vegetarian") }
-            if !has(names + " " + title, porkWords) && !has(names + " " + title, alcoholWords) { diets.insert("Halal") }
-
-            let meatCount = ingredients.filter { $0.category == Category.meat }.count
-            let produceCount = ingredients.filter { $0.category == Category.produce }.count
-            let hasGrain = ingredients.contains { $0.category == Category.grains } || names.contains("potato")
+        }
+        if hasContent {
+            if tags == nil {
+                if has(names, histamineWords) { intolerances.insert("Histamine") }
+                if has(names, fructoseWords) { intolerances.insert("Fructose") }
+                if has(names, sorbitolWords) { intolerances.insert("Sorbitol") }
+                if has(names, caffeineWords) { intolerances.insert("Caffeine") }
+                if !has(names + " " + title, porkWords) && !has(names + " " + title, alcoholWords) { diets.insert("Halal") }
+            }
             if minutes > 0 && minutes <= 30 { goals.insert("Save Time") }
             goals.insert("Try News")
-            if meatCount > 0 || has(names, ["egg", "tofu", "lentil", "chickpea", "bean"]) { goals.insert("High Protein") }
-            if !hasGrain { goals.insert("Low Carb") }
-            if produceCount >= 3 && r.category != "dessert" { goals.insert("Eat Healthier") }
-            if meatCount == 0 { goals.insert("Budget Friendly") }
-
             if goals.contains("Eat Healthier") { vibes.insert("Healthy") }
-            if r.category == "soup" || has(title, ["stew", "lasagne", "bourguignon", "coq", "pie", "curry", "risotto", "carbonara"]) {
+            if r.category == "soup" || has(title, ["stew", "lasagne", "bourguignon", "coq", "pie", "curry", "risotto", "carbonara", "chowder", "feijoada", "locro"]) {
                 vibes.insert("Comfort food")
             }
-            if (r.defaultServings ?? 1) >= 4 { vibes.insert("Family Friendly") }
+            if servings >= 4 { vibes.insert("Family Friendly") }
         }
 
         var hash = 0
         for u in r.countryId.unicodeScalars { hash = (hash &* 31 &+ Int(u.value)) % 1000 }
 
-        var recipe = Recipe(id: r.id, name: r.name, minutes: verified ? minutes : 0, tag: label(r.category),
-                            servings: r.servings, emoji: r.imageEmoji, hue: Double(hash % 100) / 100,
+        var recipe = Recipe(id: r.id, name: r.name, minutes: hasContent ? minutes : 0, tag: label(r.category),
+                            servings: servings, emoji: r.imageEmoji, hue: Double(hash % 100) / 100,
                             blurb: r.description, verified: verified, sourceUrl: r.sourceUrl,
                             meals: mealTypes(r.category), ingredients: ingredients, steps: steps)
+        recipe.draft = draft != nil
         recipe.allergens = allergens
         recipe.intolerances = intolerances
         recipe.diets = diets
         recipe.goals = goals
         recipe.vibes = vibes
+        recipe.costPerServing = tags?.cost ?? 3
         recipe.region = area?.name ?? ""
         recipe.country = country?.name ?? ""
         return recipe

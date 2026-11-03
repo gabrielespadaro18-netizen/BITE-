@@ -206,7 +206,8 @@ struct ShoppingListView: View {
             Text(item.name).font(.system(size: 13))
                 .strikethrough(item.checked)
             Spacer()
-            if item.quantity > 1 { Text("×\(item.quantity)").font(.system(size: 12)).foregroundStyle(.secondary) }
+            if let amount = item.amount { Text(amount).font(.system(size: 12)).foregroundStyle(.secondary) }
+            else if item.quantity > 1 { Text("×\(item.quantity)").font(.system(size: 12)).foregroundStyle(.secondary) }
             Button { app.shopping.removeAll { $0.id == item.id } } label: {
                 Image(systemName: "xmark").font(.system(size: 11)).foregroundStyle(.secondary)
             }

@@ -106,15 +106,19 @@ final class AppState: ObservableObject {
     // MARK: Recipes
 
     /// Recipes that respect the profile's intolerances, allergies and diet.
-    /// Catalogue-only entries (not verified) have no allergen or diet data, so they are shown only
-    /// when the profile has no restrictions at all, and never in planning or suggestions.
+    /// Draft and catalogue-only entries are not verified, so they are only offered when the profile has no restrictions.
+    /// Catalogue-only entries (no ingredients) never appear in planning or suggestions.
     func safeRecipes(includeUnverified: Bool = false) -> [Recipe] {
         let p = profile
         let hasRestrictions = !p.intolerances.subtracting([Options.noIntolerances]).isEmpty
             || !p.allergies.subtracting([Options.noAllergies]).isEmpty
             || p.diet != Options.noPreferences
         return Recipe.all.filter { r in
-            if !r.verified && (!includeUnverified || hasRestrictions) { return false }
+            if !r.verified {
+                // Drafts were not checked by World Table: only offer them to people with no restrictions.
+                if r.draft { if hasRestrictions { return false } }
+                else if !includeUnverified || hasRestrictions { return false }
+            }
             return r.intolerances.isDisjoint(with: p.intolerances)
                 && r.allergens.isDisjoint(with: p.allergies)
                 && (p.diet == Options.noPreferences || r.diets.contains(p.diet))
@@ -227,7 +231,8 @@ final class AppState: ObservableObject {
         for ingredient in recipe.ingredients where !pantryHas(ingredient.name) {
             let already = shopping.contains { !$0.checked && $0.name.lowercased() == ingredient.name.lowercased() }
             if !already {
-                shopping.append(ShoppingItem(name: ingredient.name, category: ingredient.category, quantity: ingredient.quantity))
+                shopping.append(ShoppingItem(name: ingredient.name, category: ingredient.category, quantity: ingredient.quantity,
+                                             amount: ingredient.amount.isEmpty ? nil : ingredient.amount))
             }
         }
     }

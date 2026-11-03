@@ -62,6 +62,7 @@ struct ShoppingItem: Identifiable, Codable {
     var category: String
     var quantity = 1
     var checked = false
+    var amount: String? = nil
 }
 
 struct Ingredient: Hashable {
@@ -80,7 +81,8 @@ struct Recipe: Identifiable, Hashable {
     let emoji: String
     let hue: Double
     let blurb: String
-    let verified: Bool       // false = catalogue entry only (no ingredients/steps yet)
+    let verified: Bool       // verified by World Table
+    var draft = false        // written for the app, not yet verified by World Table
     let sourceUrl: String?
     let meals: [MealType]
     let ingredients: [Ingredient]
@@ -96,6 +98,9 @@ struct Recipe: Identifiable, Hashable {
 }
 
 extension Recipe {
+    /// Has ingredients and steps (verified or draft).
+    var hasContent: Bool { verified || draft }
+
     static let all: [Recipe] = Catalog.recipes
 
     static func find(_ id: String) -> Recipe? { all.first { $0.id == id } }
