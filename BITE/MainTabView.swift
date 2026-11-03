@@ -61,9 +61,7 @@ struct HomeView: View {
             .navigationDestination(for: HomeRoute.self) { route in
                 switch route {
                 case .daily(let request):
-                    RecipeResultsView(title: "Here’s what we found",
-                                      sections: [ResultSection(title: nil, recipes: app.recipes(matching: request))],
-                                      defaultMeal: request.meal)
+                    DailyResultsView(request: request)
                 case .weekly(let request):
                     WeeklyResultsView(request: request)
                 case .all:

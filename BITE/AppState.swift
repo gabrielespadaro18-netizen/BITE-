@@ -181,6 +181,14 @@ final class AppState: ObservableObject {
         if saved.contains(recipe.id) { saved.removeAll { $0 == recipe.id } } else { saved.append(recipe.id) }
     }
 
+    // MARK: Suggestions
+
+    /// One pick from the matches, favouring the best-ranked ones; avoids repeats until the pool runs out.
+    func suggestion(from pool: [Recipe], excluding seen: Set<String> = []) -> Recipe? {
+        let fresh = pool.filter { !seen.contains($0.id) }
+        return (fresh.isEmpty ? pool : fresh).prefix(3).randomElement()
+    }
+
     // MARK: Plan
 
     private static let dayFormatter: DateFormatter = {

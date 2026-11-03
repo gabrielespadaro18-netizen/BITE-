@@ -270,3 +270,57 @@ struct WeeklyResultsView: View {
         }
     }
 }
+
+
+/// "Here's what we found" for a daily plan: a highlighted meal suggestion on top, then every match.
+struct DailyResultsView: View {
+    @EnvironmentObject var app: AppState
+    let request: DailyRequest
+    @State private var pick: Recipe?
+    @State private var seen: Set<String> = []
+
+    private var matches: [Recipe] { app.recipes(matching: request) }
+
+    var body: some View {
+        ResultsScaffold(title: "Here’s what we found") {
+            VStack(alignment: .leading, spacing: 14) {
+                if matches.isEmpty {
+                    Text("No recipes match these choices yet. Try changing your answers.")
+                        .font(.subheadline).foregroundStyle(.secondary).padding(.top, 20)
+                }
+                if let pick {
+                    HStack {
+                        Label("Meal suggestion", systemImage: "sparkles")
+                            .font(.system(size: 18, weight: .semibold))
+                        Spacer()
+                        if matches.count > 1 {
+                            Button { shuffle() } label: {
+                                Label("Another", systemImage: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 12, weight: .semibold)).foregroundStyle(Color.biteGreen)
+                            }
+                        }
+                    }
+                    .padding(.top, 6)
+                    NavigationLink(value: RecipeRoute(recipe: pick, meal: request.meal)) { RecipeCard(recipe: pick) }
+                        .buttonStyle(.plain)
+                        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(Color.biteGreen, lineWidth: 2))
+                }
+                let rest = matches.filter { $0.id != pick?.id }
+                if !rest.isEmpty {
+                    Text("More matches :").font(.system(size: 18, weight: .semibold)).padding(.top, 6)
+                    ForEach(rest) { recipe in
+                        NavigationLink(value: RecipeRoute(recipe: recipe, meal: request.meal)) { RecipeCard(recipe: recipe) }
+                            .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+        .onAppear { if pick == nil { shuffle() } }
+    }
+
+    private func shuffle() {
+        pick = app.suggestion(from: matches, excluding: seen)
+        if let pick { seen.insert(pick.id) }
+    }
+}
