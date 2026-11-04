@@ -1,0 +1,511 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7F5F5337B4067F4274D6C0BF = {
+			isa = PBXBuildFile;
+			fileRef = C71188FAABE28440A5E97B10 /* AppState.swift */;
+		};
+		67DA9EF12B6CD0E168FE1B6E = {
+			isa = PBXBuildFile;
+			fileRef = 4FF390B52B13AF0777077F6E /* BITEApp.swift */;
+		};
+		170A8B001532FF819F8C0667 = {
+			isa = PBXBuildFile;
+			fileRef = 268D73E7DF247729481A399C /* Catalog.swift */;
+		};
+		D24FE712DD76AE6EDC9F3A16 = {
+			isa = PBXBuildFile;
+			fileRef = 70C06D8EFACD6EB13C8AC937 /* DraftData.swift */;
+		};
+		163FBA9646465EEDA6957357 = {
+			isa = PBXBuildFile;
+			fileRef = A16CD18AD45B19FC57EDFB89 /* MainTabView.swift */;
+		};
+		57AC1D5D2AA7CE56D5D98E5C = {
+			isa = PBXBuildFile;
+			fileRef = 73662121D6569B995F11F39E /* Models.swift */;
+		};
+		D8992888EB76B05C9C41288E = {
+			isa = PBXBuildFile;
+			fileRef = A97813AC3BD252D5DFAEE7FA /* OnboardingViews.swift */;
+		};
+		E05CE44D63E0B3586FEA9AE4 = {
+			isa = PBXBuildFile;
+			fileRef = 8DBDFFE2FCBEABF91CF5A0F0 /* PantryTemplates.swift */;
+		};
+		C31AEE9BF635EF5CEF1C302C = {
+			isa = PBXBuildFile;
+			fileRef = A25BC104114015BA6B8AD4E7 /* PantryViews.swift */;
+		};
+		0D4875FF26526159F65844BC = {
+			isa = PBXBuildFile;
+			fileRef = 82AC412E1A06FDF7442D9B1D /* PersonalRecipeViews.swift */;
+		};
+		F62160F907DA62561A97E09C = {
+			isa = PBXBuildFile;
+			fileRef = 290EA583100CFC4EF1D09E44 /* Pickers.swift */;
+		};
+		D6258FE6FFF07DD454A6AA0E = {
+			isa = PBXBuildFile;
+			fileRef = 3939BDFDE1BEFDF84B278268 /* PlanFlow.swift */;
+		};
+		BEAEEF790E65696EBB901323 = {
+			isa = PBXBuildFile;
+			fileRef = 1E6AB3EE2B92E4533910B9F0 /* PlanView.swift */;
+		};
+		F42A1CB7D3CD087297466F4C = {
+			isa = PBXBuildFile;
+			fileRef = 20FC7EB82E7F2D8C44C25304 /* ProfileViews.swift */;
+		};
+		40372513CB804ED2295BD400 = {
+			isa = PBXBuildFile;
+			fileRef = 8CA28191FB804FEF174985F3 /* ReceiptParser.swift */;
+		};
+		9B35F24F3194E2AADB5769A2 = {
+			isa = PBXBuildFile;
+			fileRef = DC20424DEFD3C80DF440DEC3 /* ReceiptScannerView.swift */;
+		};
+		712F7C2BA54B961A7EDC7D66 = {
+			isa = PBXBuildFile;
+			fileRef = 3A0292F9964BADE38D680940 /* RecipeAPI.swift */;
+		};
+		60748FB48A212C9560F6F09E = {
+			isa = PBXBuildFile;
+			fileRef = AC888F471936EEA143A23DF2 /* RecipeViews.swift */;
+		};
+		6BC1AA98BD7690DD4FD78043 = {
+			isa = PBXBuildFile;
+			fileRef = 50EA1C59466C01BB4CA2D224 /* SimpleRecipes.swift */;
+		};
+		81EA5CCC646784721C744BA9 = {
+			isa = PBXBuildFile;
+			fileRef = 855E4688C94C8E6AA6B76F5B /* SketchIcons.swift */;
+		};
+		EE484B813D836017E3F0BA59 = {
+			isa = PBXBuildFile;
+			fileRef = C6DD89B4124646BEA2CBC5B5 /* Theme.swift */;
+		};
+		6936EFDF3C25770397D0F00A = {
+			isa = PBXBuildFile;
+			fileRef = FA52A44741167513C3A56447 /* WorldTableData.swift */;
+		};
+		66518C5D782BBD778F002FAA = {
+			isa = PBXBuildFile;
+			fileRef = 3D10234C1F4B2C1976FF8B08 /* Assets.xcassets */;
+		};
+		7031AE4588374F62D3BCA5C5 = {
+			isa = PBXBuildFile;
+			fileRef = 407EED62A771E1CB4CF80E28 /* simple_recipes.json */;
+		};
+        A9BCDF9876543210ABCDEF01 = {
+            isa = PBXBuildFile;
+            fileRef = A9BCDF9876543210ABCDEF02 /* PantryNotifications.swift */;
+        };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		C71188FAABE28440A5E97B10 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "AppState.swift";
+			sourceTree = "<group>";
+		};
+		4FF390B52B13AF0777077F6E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "BITEApp.swift";
+			sourceTree = "<group>";
+		};
+		268D73E7DF247729481A399C = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "Catalog.swift";
+			sourceTree = "<group>";
+		};
+		70C06D8EFACD6EB13C8AC937 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "DraftData.swift";
+			sourceTree = "<group>";
+		};
+		A16CD18AD45B19FC57EDFB89 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "MainTabView.swift";
+			sourceTree = "<group>";
+		};
+		73662121D6569B995F11F39E = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "Models.swift";
+			sourceTree = "<group>";
+		};
+		A97813AC3BD252D5DFAEE7FA = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "OnboardingViews.swift";
+			sourceTree = "<group>";
+		};
+		8DBDFFE2FCBEABF91CF5A0F0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PantryTemplates.swift";
+			sourceTree = "<group>";
+		};
+		A25BC104114015BA6B8AD4E7 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PantryViews.swift";
+			sourceTree = "<group>";
+		};
+		82AC412E1A06FDF7442D9B1D = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PersonalRecipeViews.swift";
+			sourceTree = "<group>";
+		};
+		290EA583100CFC4EF1D09E44 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "Pickers.swift";
+			sourceTree = "<group>";
+		};
+		3939BDFDE1BEFDF84B278268 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PlanFlow.swift";
+			sourceTree = "<group>";
+		};
+		1E6AB3EE2B92E4533910B9F0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "PlanView.swift";
+			sourceTree = "<group>";
+		};
+		20FC7EB82E7F2D8C44C25304 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ProfileViews.swift";
+			sourceTree = "<group>";
+		};
+		8CA28191FB804FEF174985F3 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ReceiptParser.swift";
+			sourceTree = "<group>";
+		};
+		DC20424DEFD3C80DF440DEC3 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "ReceiptScannerView.swift";
+			sourceTree = "<group>";
+		};
+		3A0292F9964BADE38D680940 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "RecipeAPI.swift";
+			sourceTree = "<group>";
+		};
+		AC888F471936EEA143A23DF2 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "RecipeViews.swift";
+			sourceTree = "<group>";
+		};
+		50EA1C59466C01BB4CA2D224 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "SimpleRecipes.swift";
+			sourceTree = "<group>";
+		};
+		855E4688C94C8E6AA6B76F5B = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "SketchIcons.swift";
+			sourceTree = "<group>";
+		};
+		C6DD89B4124646BEA2CBC5B5 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "Theme.swift";
+			sourceTree = "<group>";
+		};
+		FA52A44741167513C3A56447 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = "WorldTableData.swift";
+			sourceTree = "<group>";
+		};
+		3D10234C1F4B2C1976FF8B08 = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = "Assets.xcassets";
+			sourceTree = "<group>";
+		};
+		407EED62A771E1CB4CF80E28 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.json;
+			path = "simple_recipes.json";
+			sourceTree = "<group>";
+		};
+		FF8F058720918943F031756C = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = "Info.plist";
+			sourceTree = "<group>";
+		};
+		47BB84BD86F09A16F16C17AD /* BITE.app */ = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = "BITE.app";
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+        A9BCDF9876543210ABCDEF02 = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            path = "PantryNotifications.swift";
+            sourceTree = "<group>";
+        };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FA9AB2E7B1FA7B8920C9695C = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7C57C4A279433810EC314DAE = {
+			isa = PBXGroup;
+			children = (
+				DA22F2440ADEE524A9D44265 /* BITE */,
+				6774A61700ABBB00223326D3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DA22F2440ADEE524A9D44265 = {
+			isa = PBXGroup;
+			children = (
+				C71188FAABE28440A5E97B10 /* AppState.swift */,
+				4FF390B52B13AF0777077F6E /* BITEApp.swift */,
+				268D73E7DF247729481A399C /* Catalog.swift */,
+				70C06D8EFACD6EB13C8AC937 /* DraftData.swift */,
+				A16CD18AD45B19FC57EDFB89 /* MainTabView.swift */,
+				73662121D6569B995F11F39E /* Models.swift */,
+				A97813AC3BD252D5DFAEE7FA /* OnboardingViews.swift */,
+				8DBDFFE2FCBEABF91CF5A0F0 /* PantryTemplates.swift */,
+				A25BC104114015BA6B8AD4E7 /* PantryViews.swift */,
+				82AC412E1A06FDF7442D9B1D /* PersonalRecipeViews.swift */,
+				290EA583100CFC4EF1D09E44 /* Pickers.swift */,
+				3939BDFDE1BEFDF84B278268 /* PlanFlow.swift */,
+				1E6AB3EE2B92E4533910B9F0 /* PlanView.swift */,
+				20FC7EB82E7F2D8C44C25304 /* ProfileViews.swift */,
+				8CA28191FB804FEF174985F3 /* ReceiptParser.swift */,
+				DC20424DEFD3C80DF440DEC3 /* ReceiptScannerView.swift */,
+				3A0292F9964BADE38D680940 /* RecipeAPI.swift */,
+				AC888F471936EEA143A23DF2 /* RecipeViews.swift */,
+				50EA1C59466C01BB4CA2D224 /* SimpleRecipes.swift */,
+				855E4688C94C8E6AA6B76F5B /* SketchIcons.swift */,
+				C6DD89B4124646BEA2CBC5B5 /* Theme.swift */,
+				FA52A44741167513C3A56447 /* WorldTableData.swift */,
+				A9BCDF9876543210ABCDEF02 /* PantryNotifications.swift */,
+				3D10234C1F4B2C1976FF8B08 /* Assets.xcassets */,
+				407EED62A771E1CB4CF80E28 /* simple_recipes.json */,
+				FF8F058720918943F031756C /* Info.plist */,
+			);
+			path = BITE;
+			sourceTree = "<group>";
+		};
+		6774A61700ABBB00223326D3 = {
+			isa = PBXGroup;
+			children = (
+				47BB84BD86F09A16F16C17AD /* BITE.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		71DF1DB2D0C7CF23C9E33DD7 = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 61934ACE69F074E1378AABBF /* Build configuration list for PBXNativeTarget "BITE" */;
+			buildPhases = (
+				D8CC3BA39B58C6A6939FECD2 /* Sources */,
+				FA9AB2E7B1FA7B8920C9695C /* Frameworks */,
+				DC15B6032484219D859E6E70 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BITE;
+			productName = BITE;
+			productReference = 47BB84BD86F09A16F16C17AD /* BITE.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2E861D4A6DC29023D7DC48B5 = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = { 71DF1DB2D0C7CF23C9E33DD7 = { CreatedOnToolsVersion = 16.0; }; };
+			};
+			buildConfigurationList = 8FB750D76810092BBBAE0EEF /* Build configuration list for PBXProject "BITE" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = ( en, Base, );
+			mainGroup = 7C57C4A279433810EC314DAE;
+			productRefGroup = 6774A61700ABBB00223326D3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = ( 71DF1DB2D0C7CF23C9E33DD7 /* BITE */, );
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DC15B6032484219D859E6E70 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				66518C5D782BBD778F002FAA /* Assets.xcassets in Resources */,
+				7031AE4588374F62D3BCA5C5 /* simple_recipes.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D8CC3BA39B58C6A6939FECD2 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7F5F5337B4067F4274D6C0BF /* AppState.swift in Sources */,
+				67DA9EF12B6CD0E168FE1B6E /* BITEApp.swift in Sources */,
+				170A8B001532FF819F8C0667 /* Catalog.swift in Sources */,
+				D24FE712DD76AE6EDC9F3A16 /* DraftData.swift in Sources */,
+				163FBA9646465EEDA6957357 /* MainTabView.swift in Sources */,
+				57AC1D5D2AA7CE56D5D98E5C /* Models.swift in Sources */,
+				D8992888EB76B05C9C41288E /* OnboardingViews.swift in Sources */,
+				E05CE44D63E0B3586FEA9AE4 /* PantryTemplates.swift in Sources */,
+				C31AEE9BF635EF5CEF1C302C /* PantryViews.swift in Sources */,
+				0D4875FF26526159F65844BC /* PersonalRecipeViews.swift in Sources */,
+				F62160F907DA62561A97E09C /* Pickers.swift in Sources */,
+				D6258FE6FFF07DD454A6AA0E /* PlanFlow.swift in Sources */,
+				BEAEEF790E65696EBB901323 /* PlanView.swift in Sources */,
+				F42A1CB7D3CD087297466F4C /* ProfileViews.swift in Sources */,
+				40372513CB804ED2295BD400 /* ReceiptParser.swift in Sources */,
+				9B35F24F3194E2AADB5769A2 /* ReceiptScannerView.swift in Sources */,
+				712F7C2BA54B961A7EDC7D66 /* RecipeAPI.swift in Sources */,
+				60748FB48A212C9560F6F09E /* RecipeViews.swift in Sources */,
+				6BC1AA98BD7690DD4FD78043 /* SimpleRecipes.swift in Sources */,
+				81EA5CCC646784721C744BA9 /* SketchIcons.swift in Sources */,
+				EE484B813D836017E3F0BA59 /* Theme.swift in Sources */,
+				6936EFDF3C25770397D0F00A /* WorldTableData.swift in Sources */,
+				A9BCDF9876543210ABCDEF01 /* PantryNotifications.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		9A4087DD37D713AFC7AA7E90 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                SDKROOT = iphoneos;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                SWIFT_VERSION = 5.0;
+            };
+			name = Debug;
+		};
+		3ED288A2EC2ED94545956B71 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                CLANG_ENABLE_MODULES = YES;
+                CLANG_ENABLE_OBJC_ARC = YES;
+                SDKROOT = iphoneos;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+                SWIFT_VERSION = 5.0;
+            };
+			name = Release;
+		};
+		002CE1089971B7279C10AD16 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+                CLANG_ENABLE_MODULES = YES;
+                CODE_SIGN_STYLE = Automatic;
+                GENERATE_INFOPLIST_FILE = NO;
+                INFOPLIST_FILE = BITE/Info.plist;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.example.BITE;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+			name = Debug;
+		};
+		DDC37210120012EEAD764E39 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+                CLANG_ENABLE_MODULES = YES;
+                CODE_SIGN_STYLE = Automatic;
+                GENERATE_INFOPLIST_FILE = NO;
+                INFOPLIST_FILE = BITE/Info.plist;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                PRODUCT_BUNDLE_IDENTIFIER = com.example.BITE;
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SWIFT_VERSION = 5.0;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8FB750D76810092BBBAE0EEF = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A4087DD37D713AFC7AA7E90 /* Debug */,
+				3ED288A2EC2ED94545956B71 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		61934ACE69F074E1378AABBF = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				002CE1089971B7279C10AD16 /* Debug */,
+				DDC37210120012EEAD764E39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 2E861D4A6DC29023D7DC48B5 /* Project object */;
+}
