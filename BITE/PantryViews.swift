@@ -8,7 +8,8 @@ struct PantryView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top) {
-                    Text("What’s in My\nPantry").font(.system(size: 28, weight: .bold))
+                    Text("What’s in My\nPantry")
+                        .font(.system(size: 28, weight: .bold))
                     Spacer()
                     AppleMascot(mood: .wink, size: 64)
                 }
@@ -18,14 +19,17 @@ struct PantryView: View {
                     Text("What I have:").font(.system(size: 16, weight: .bold))
                     Spacer()
                     Button { showAdd = true } label: {
-                        Label("Add Food", systemImage: "plus")
-                            .font(.system(size: 13, weight: .semibold)).foregroundStyle(.white)
-                            .padding(.horizontal, 14).padding(.vertical, 8)
+                        Label("Scan / Add Items", systemImage: "doc.text.viewfinder")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
                             .background(Capsule().fill(Color.biteGreen))
                     }
                 }
                 .padding(.horizontal, 20)
 
+                // The list owns the remaining space and scrolls independently.
                 List {
                     ForEach(app.pantry) { item in
                         HStack {
@@ -33,7 +37,8 @@ struct PantryView: View {
                                 Text(item.name).font(.system(size: 13))
                                 if let expiry = item.expiry {
                                     Text("Expires \(expiry.formatted(date: .abbreviated, time: .omitted))")
-                                        .font(.system(size: 10)).foregroundStyle(.secondary)
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.secondary)
                                 }
                             }
                             Spacer()
@@ -46,21 +51,38 @@ struct PantryView: View {
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .overlay {
                     if app.pantry.isEmpty {
-                        Text("Your pantry is empty.\nTap “Add Food” to start.")
-                            .multilineTextAlignment(.center).foregroundStyle(.secondary)
+                        Text("Your pantry is empty.\nTap “Scan / Add Food” to start.")
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary)
+                            .allowsHitTesting(false)
                     }
                 }
 
-                NavigationLink { ShoppingListView() } label: {
-                    Label("Open Shopping List", systemImage: "cart")
-                        .font(.system(size: 14, weight: .semibold)).foregroundStyle(.white)
-                        .frame(maxWidth: .infinity).frame(height: 48)
-                        .background(Capsule().fill(Color.biteGreen))
+                // Ordinary layout siblings, NOT bottom overlays/safeAreaInsets.
+                // They have guaranteed height ABOVE MainTabView's separate tab bar.
+                VStack(spacing: 9) {
+                    NavigationLink { PantryIdeasView() } label: {
+                        Label("Cook with my pantry", systemImage: "fork.knife")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(Color.biteGreen)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(Capsule().stroke(Color.biteGreen, lineWidth: 1.5))
+                    }
+                    NavigationLink { ShoppingListView() } label: {
+                        Label("Open Shopping List", systemImage: "cart")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(Capsule().fill(Color.biteGreen))
+                    }
                 }
                 .padding(.horizontal, 20)
-                .padding(.bottom, 10)
+                .padding(.bottom, 8)
             }
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $showAdd) { AddFoodView() }
@@ -80,14 +102,14 @@ struct AddFoodView: View {
     @State private var amount = 1
     @State private var hasExpiry = true
     @State private var expiry = Date()
-    @State private var showScanInfo = false
+    @State private var showScanner = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Button { showScanInfo = true } label: {
-                        Label("Scan Your Food", systemImage: "barcode.viewfinder")
+                    Button { showScanner = true } label: {
+                        Label("Scan Receipt", systemImage: "doc.text.viewfinder")
                             .font(.system(size: 14, weight: .semibold)).foregroundStyle(.white)
                             .frame(maxWidth: .infinity).frame(height: 64)
                             .background(Capsule().fill(Color.biteGreen))
@@ -126,11 +148,7 @@ struct AddFoodView: View {
                         .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-            .alert("Scanning isn’t available yet", isPresented: $showScanInfo) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("For now, please add your food manually.")
-            }
+            .sheet(isPresented: $showScanner) { ReceiptScannerView() }
         }
     }
 

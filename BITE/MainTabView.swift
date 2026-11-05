@@ -1,24 +1,42 @@
 import SwiftUI
 
+/// Uses the system-managed iOS tab bar (UITabBar via SwiftUI TabView).
+/// No custom backgrounds, capsules, overlays, fixed tab heights, or tab-bar positioning.
 struct MainTabView: View {
+    @EnvironmentObject private var app: AppState
     @State private var tab = 0
 
     var body: some View {
         TabView(selection: $tab) {
             HomeView()
-                .tabItem { Label("Bite", systemImage: "fork.knife") }
+                .tabItem { Label("Bite", systemImage: "fork.knife.circle") }
                 .tag(0)
+
             RecipesView()
-                .tabItem { Label("Recipes", systemImage: "book.closed.fill") }
+                .tabItem { Label("Recipes", systemImage: "book.closed") }
                 .tag(1)
+
             PlanView()
                 .tabItem { Label("My Plan", systemImage: "calendar") }
                 .tag(2)
+
             PantryView()
                 .tabItem { Label("Pantry", systemImage: "carrot") }
                 .tag(3)
         }
         .tint(Color.biteGreen)
+        .task {
+            await PantryNotifications.update(pantry: app.pantry, shopping: app.shopping, plan: app.plan)
+        }
+        .onReceive(app.$pantry) { items in
+            Task { await PantryNotifications.update(pantry: items, shopping: app.shopping, plan: app.plan) }
+        }
+        .onReceive(app.$shopping) { items in
+            Task { await PantryNotifications.update(pantry: app.pantry, shopping: items, plan: app.plan) }
+        }
+        .onReceive(app.$plan) { value in
+            Task { await PantryNotifications.update(pantry: app.pantry, shopping: app.shopping, plan: value) }
+        }
     }
 }
 
@@ -26,12 +44,14 @@ struct HomeView: View {
     @EnvironmentObject var app: AppState
     @State private var path = NavigationPath()
     @State private var showFlow = false
+    @AppStorage("bite.onboarding.reminder.shown") private var reminderShown = false
+    @State private var showOnboardingReminder = false
 
     var body: some View {
         NavigationStack(path: $path) {
             VStack(alignment: .leading, spacing: 0) {
                 header
-                Text("Welcome \(app.profile.name)!")
+                Text(app.profile.name.isEmpty ? "Welcome to BITE!" : "Welcome \(app.profile.name)!")
                     .font(.system(size: 12))
                     .padding(.top, 20)
 
@@ -47,9 +67,14 @@ struct HomeView: View {
 
                 planButton
                     .background(alignment: .topTrailing) {
-                        AppleMascot(mood: .happy, size: 74)
-                            .offset(x: -15, y: -70).rotationEffect(.degrees(30))
+                        // Draw the original mascot BEHIND the CTA, like the Sketch.
+                        // Only its upper portion rises above the button edge.
+                        AppleMascot(mood: .happy, size: 82)
+                            .rotationEffect(.degrees(-12))
+                            .offset(x: -15, y: -66)
+                            .allowsHitTesting(false)
                     }
+                    .padding(.top, 66)
 
                 Spacer(minLength: 24)
 
@@ -73,6 +98,22 @@ struct HomeView: View {
             .sheet(isPresented: $showFlow) {
                 PlanFlowSheet(onDaily: { path.append(HomeRoute.daily($0)) }, onWeekly: { path.append(HomeRoute.weekly($0)) })
             }
+            .onAppear {
+                if app.profile.skippedOnboarding && !reminderShown {
+                    showOnboardingReminder = true
+                    reminderShown = true
+                }
+                if !app.profile.skippedOnboarding { reminderShown = false }
+            }
+            .alert("Finish your BITE! setup?", isPresented: $showOnboardingReminder) {
+                Button("Complete onboarding") {
+                    app.profile.skippedOnboarding = false
+                    app.profile.onboarded = false
+                }
+                Button("Later", role: .cancel) { }
+            } message: {
+                Text("Answering a few questions will help personalize recipes. You can also resume anytime from your profile.")
+            }
         }
     }
 
@@ -95,12 +136,14 @@ struct HomeView: View {
     private var planButton: some View {
         Button { showFlow = true } label: {
             VStack(spacing: 8) {
-                Image(systemName: "fork.knife").font(.system(size: 30, weight: .medium))
+                Image(systemName: "takeoutbag.and.cup.and.straw")
+                    .font(.system(size: 37, weight: .regular))
+                    .accessibilityHidden(true)
                 Text("Plan Your Meal").font(.system(size: 20, weight: .bold))
             }
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity).frame(height: 112)
-            .background(RoundedRectangle(cornerRadius: 36, style: .continuous).fill(Color.biteGreen)
+            .background(RoundedRectangle(cornerRadius: 58, style: .continuous).fill(Color.biteGreen)
                 .shadow(color: Color.biteGreen.opacity(0.4), radius: 10, y: 6))
         }
     }

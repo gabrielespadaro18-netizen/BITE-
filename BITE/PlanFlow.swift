@@ -34,17 +34,20 @@ struct PlanFlowSheet: View {
     private var choice: some View {
         VStack(spacing: 18) {
             SheetHeader(title: "Select your choice") { dismiss() }
-            choiceButton("Plan Daily", icon: "calendar") { step = .daily }
-            choiceButton("Plan Weekly", icon: "calendar.badge.clock") { step = .weekly }
+            choiceButton("Plan Daily", day: 1) { step = .daily }
+            choiceButton("Plan Weekly", day: 7) { step = .weekly }
             Spacer()
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
     }
 
-    private func choiceButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func choiceButton(_ title: String, day: Int, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Label(title, systemImage: icon)
+            HStack(spacing: 7) {
+                SketchCalendarIcon(day: day)
+                Text(title)
+            }
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(.black)
                 .frame(maxWidth: .infinity).frame(height: 56)

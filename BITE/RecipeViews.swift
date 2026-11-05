@@ -1,19 +1,42 @@
 import SwiftUI
+import UIKit
 
 struct RecipeImage: View {
     let recipe: Recipe
     var symbolSize: CGFloat = 34
     var corner: CGFloat = 16
 
+    private var localAsset: String {
+        "RecipeArt_" + recipe.id.map { $0.isASCII && $0.isLetter || $0.isNumber ? String($0) : "_" }.joined()
+    }
+
     var body: some View {
+        Group {
+            // Original bundled illustrations, always available offline and never
+            // pulled from unverified third-party photo sources.
+            if UIImage(named: localAsset) != nil {
+                GeometryReader { geometry in
+                    Image(localAsset)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                }
+            } else {
+                fallback
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
+        .accessibilityLabel("Illustration for \(recipe.name)")
+    }
+
+    private var fallback: some View {
         ZStack {
             LinearGradient(colors: [Color(hue: recipe.hue, saturation: 0.45, brightness: 0.97),
                                     Color(hue: recipe.hue, saturation: 0.7, brightness: 0.78)],
                            startPoint: .topLeading, endPoint: .bottomTrailing)
-            Text(recipe.emoji)
-                .font(.system(size: symbolSize * 1.3))
+            Text(recipe.emoji).font(.system(size: symbolSize * 1.3))
         }
-        .clipShape(RoundedRectangle(cornerRadius: corner, style: .continuous))
     }
 }
 
@@ -114,8 +137,9 @@ struct RecipeResultsView: View {
 struct RecipesView: View {
     @EnvironmentObject var app: AppState
     @State private var query = ""
+    @State private var showGlutenFree = false
 
-    private var recentRecipes: [Recipe] { app.recent.compactMap { Recipe.find($0) } }
+    private var recentRecipes: [Recipe] { app.recent.compactMap { app.findRecipe($0) } }
 
     var body: some View {
         NavigationStack {
@@ -135,6 +159,8 @@ struct RecipesView: View {
                         .shadow(color: .black.opacity(0.1), radius: 5, y: 2))
 
                     if query.trimmingCharacters(in: .whitespaces).isEmpty {
+                        personalActions
+                        glutenFreeSection
                         recent
                         countries
                     } else {
@@ -152,6 +178,64 @@ struct RecipesView: View {
                                                            recipes: app.safeRecipes(includeUnverified: true).filter { $0.country == route.country })])
             }
             .toolbar(.hidden, for: .navigationBar)
+        }
+    }
+
+    private var glutenFreeSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Gluten-Free ideas").font(.system(size: 16, weight: .bold))
+                Spacer()
+                Button(showGlutenFree ? "Hide" : "See all") { showGlutenFree.toggle() }
+                    .font(.subheadline).foregroundStyle(Color.biteGreen)
+            }
+            Text("Recipes using gluten-free products. They are drafts: check certified labels, cross-contact and allergens before cooking.")
+                .font(.footnote).foregroundStyle(.secondary)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(Array(SimpleRecipes.all.filter { $0.vibes.contains("Gluten-Free") }.prefix(4))) { recipe in
+                        NavigationLink(value: RecipeRoute(recipe: recipe)) {
+                            VStack(alignment: .leading, spacing: 7) {
+                                RecipeImage(recipe: recipe, symbolSize: 24).frame(height: 84)
+                                Text(recipe.name).font(.system(size: 12, weight: .bold))
+                                    .foregroundStyle(.primary).lineLimit(2)
+                            }
+                            .frame(width: 138, height: 128, alignment: .top)
+                            .padding(9)
+                            .background(CardBackground(radius: 15))
+                        }.buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 6)
+            }
+            if showGlutenFree {
+                ForEach(SimpleRecipes.all.filter { $0.vibes.contains("Gluten-Free") }) { recipe in
+                    NavigationLink(value: RecipeRoute(recipe: recipe)) {
+                        RecipeCard(recipe: recipe)
+                    }.buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private var personalActions: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Cook with what you have").font(.system(size: 16, weight: .bold))
+            HStack(spacing: 8) {
+                NavigationLink { PantryIdeasView() } label: {
+                    Label("From my pantry", systemImage: "refrigerator")
+                        .font(.system(size: 12, weight: .semibold)).frame(maxWidth: .infinity)
+                        .frame(height: 46).background(Capsule().fill(Color.biteMint))
+                }
+            }
+            .foregroundStyle(Color.biteDark)
+            if !app.personalRecipes.isEmpty {
+                Text("My recipes:").font(.system(size: 15, weight: .bold))
+                ForEach(app.personalRecipes) { recipe in
+                    NavigationLink(value: RecipeRoute(recipe: recipe)) { RecipeCard(recipe: recipe) }
+                        .buttonStyle(.plain)
+                }
+            }
         }
     }
 
@@ -199,7 +283,11 @@ struct RecipesView: View {
                 ForEach(Region.allCases, id: \.self) { region in
                     NavigationLink(value: region) {
                         VStack(spacing: 10) {
-                            Image(systemName: region.symbol).font(.system(size: 30)).foregroundStyle(Color.biteGreen)
+                            Image(region.sketchMapAsset ?? "EuropeMap")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 72, height: 64)
+                                .accessibilityHidden(true)
                             Text(region.rawValue).font(.system(size: 12, weight: .semibold)).foregroundStyle(.black)
                         }
                         .frame(maxWidth: .infinity).frame(height: 104)
@@ -365,13 +453,20 @@ struct RecipeDetailView: View {
         if !recipe.hasContent {
             EmptyView()
         } else if let meal = route.meal {
-            Button { add(to: meal) } label: { addPill }
+            if app.planned(on: Date(), meal: meal).count < meal.dailyLimit {
+                Button { add(to: meal) } label: { addPill }
+            }
         } else {
-            Menu {
-                ForEach(MealType.allCases) { meal in
-                    Button(meal.rawValue) { add(to: meal) }
-                }
-            } label: { addPill }
+            let availableMeals = MealType.allCases.filter {
+                app.planned(on: Date(), meal: $0).count < $0.dailyLimit
+            }
+            if !availableMeals.isEmpty {
+                Menu {
+                    ForEach(availableMeals) { meal in
+                        Button(meal.rawValue) { add(to: meal) }
+                    }
+                } label: { addPill }
+            }
         }
     }
 
@@ -383,7 +478,10 @@ struct RecipeDetailView: View {
     }
 
     private func add(to meal: MealType) {
-        app.addToPlan(recipe, meal: meal, date: Date())
+        guard app.addToPlan(recipe, meal: meal, date: Date()) else {
+            toast = "This meal is full or already contains this recipe"
+            return
+        }
         toast = "Added to today’s \(meal.rawValue.lowercased())"
         Task {
             try? await Task.sleep(nanoseconds: 2_000_000_000)
@@ -411,25 +509,32 @@ struct RecipePickerSheet: View {
     let date: Date
 
     private var options: [Recipe] {
-        let r = app.recommended(for: meal)
-        return r.isEmpty ? Recipe.all.filter { $0.hasContent && $0.meals.contains(meal) } : r
+        let alreadyAdded = Set(app.planned(on: date, meal: meal).map(\.id))
+        return app.recommended(for: meal).filter { !alreadyAdded.contains($0.id) }
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-                    ForEach(options) { recipe in
-                        Button {
-                            app.addToPlan(recipe, meal: meal, date: date)
-                            dismiss()
-                        } label: { RecipeCard(recipe: recipe) }
-                            .buttonStyle(.plain)
+                    let count = app.planned(on: date, meal: meal).count
+                    Text("\(count) of \(meal.dailyLimit) selected")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                    if count >= meal.dailyLimit {
+                        ContentUnavailableView("Meal is full", systemImage: "checkmark.circle",
+                            description: Text("Remove an item from My Plan to choose another."))
+                    } else {
+                        ForEach(options) { recipe in
+                            Button {
+                                if app.addToPlan(recipe, meal: meal, date: date) { dismiss() }
+                            } label: { RecipeCard(recipe: recipe) }
+                                .buttonStyle(.plain)
+                        }
                     }
                 }
                 .padding(16)
             }
-            .navigationTitle("Add \(meal.rawValue)")
+            .navigationTitle("Choose \(meal.rawValue)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }

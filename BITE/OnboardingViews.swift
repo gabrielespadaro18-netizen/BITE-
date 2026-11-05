@@ -4,6 +4,7 @@ struct OnboardingFlow: View {
     @EnvironmentObject var app: AppState
     @State private var step = 0
     @State private var forward = true
+    @State private var showSkipConfirmation = false
 
     private func go(_ delta: Int) {
         forward = delta > 0
@@ -34,6 +35,30 @@ struct OnboardingFlow: View {
                 removal: .move(edge: forward ? .leading : .trailing)))
         }
         .clipped()
+        .safeAreaInset(edge: .top, spacing: 0) {
+            HStack {
+                Spacer()
+                Button("Skip") { showSkipConfirmation = true }
+                    .font(.system(size: 14, weight: .semibold))
+                    .tint(Color.biteGreen)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 8)
+                    .background(Capsule().fill(.white).shadow(color: .black.opacity(0.08), radius: 3))
+                    .accessibilityIdentifier("skipOnboarding")
+            }
+            .padding(.horizontal, 20)
+            .frame(height: 35)
+        }
+        .confirmationDialog("Skip onboarding for now?", isPresented: $showSkipConfirmation,
+                            titleVisibility: .visible) {
+            Button("Skip for now") {
+                app.profile.skippedOnboarding = true
+                app.profile.onboarded = true
+            }
+            Button("Continue onboarding", role: .cancel) { }
+        } message: {
+            Text("You can use BITE! immediately. Complete the questions later from your profile for more personalized recipes.")
+        }
     }
 
     // MARK: Screens
@@ -147,7 +172,10 @@ struct OnboardingFlow: View {
             Spacer()
             Spacer()
             PrimaryButton(title: "Continue") {
-                withAnimation { app.profile.onboarded = true }
+                withAnimation {
+                    app.profile.skippedOnboarding = false
+                    app.profile.onboarded = true
+                }
             }
         }
         .padding(.horizontal, 20)

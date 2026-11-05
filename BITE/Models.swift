@@ -7,6 +7,14 @@ enum MealType: String, CaseIterable, Codable, Identifiable {
     case snack = "Snack"
 
     var id: String { rawValue }
+
+    /// Maximum number of recipes assignable to this meal on a given day.
+    var dailyLimit: Int {
+        switch self {
+        case .breakfast, .snack: return 1
+        case .lunch, .dinner: return 3
+        }
+    }
 }
 
 enum Category {
@@ -47,6 +55,27 @@ struct UserProfile: Codable {
     var allergies: Set<String> = []
     var diet = Options.noPreferences
     var onboarded = false
+    var skippedOnboarding = false
+
+    private enum CodingKeys: String, CodingKey {
+        case name, goals, weeklyBudget, people, cookTime, intolerances, allergies, diet, onboarded, skippedOnboarding
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        goals = try c.decodeIfPresent(Set<String>.self, forKey: .goals) ?? []
+        weeklyBudget = try c.decodeIfPresent(Double.self, forKey: .weeklyBudget) ?? 20
+        people = try c.decodeIfPresent(Int.self, forKey: .people) ?? 1
+        cookTime = try c.decodeIfPresent(Int.self, forKey: .cookTime)
+        intolerances = try c.decodeIfPresent(Set<String>.self, forKey: .intolerances) ?? []
+        allergies = try c.decodeIfPresent(Set<String>.self, forKey: .allergies) ?? []
+        diet = try c.decodeIfPresent(String.self, forKey: .diet) ?? Options.noPreferences
+        onboarded = try c.decodeIfPresent(Bool.self, forKey: .onboarded) ?? false
+        skippedOnboarding = try c.decodeIfPresent(Bool.self, forKey: .skippedOnboarding) ?? false
+    }
 }
 
 struct PantryItem: Identifiable, Codable {
@@ -65,14 +94,14 @@ struct ShoppingItem: Identifiable, Codable {
     var amount: String? = nil
 }
 
-struct Ingredient: Hashable {
+struct Ingredient: Hashable, Codable {
     let name: String
     let quantity: Int        // shopping-list units to add
     let amount: String       // human text, e.g. "500 g"
     let category: String
 }
 
-struct Recipe: Identifiable, Hashable {
+struct Recipe: Identifiable, Hashable, Codable {
     let id: String
     let name: String
     let minutes: Int         // 0 when the source has no verified time
@@ -95,31 +124,22 @@ struct Recipe: Identifiable, Hashable {
     var region = ""
     var country = ""
     var vibes: Set<String> = []
+    var imageURL: String? = nil
 }
 
 extension Recipe {
     /// Has ingredients and steps (verified or draft).
     var hasContent: Bool { verified || draft }
 
-    static let all: [Recipe] = Catalog.recipes
+    static let all: [Recipe] = Catalog.recipes + SimpleRecipes.all + PantryTemplates.all
 
     static func find(_ id: String) -> Recipe? { all.first { $0.id == id } }
 }
 
 enum SeedData {
-    static var pantry: [PantryItem] {
-        [PantryItem(name: "Apples", amount: 5), PantryItem(name: "Chicken breast", amount: 5),
-         PantryItem(name: "Eggs", amount: 2), PantryItem(name: "Rice", amount: 5),
-         PantryItem(name: "Milk", amount: 1), PantryItem(name: "Tomatoes", amount: 2)]
-    }
+    static var pantry: [PantryItem] { [] }
 
-    static var shopping: [ShoppingItem] {
-        [ShoppingItem(name: "Pears", category: Category.produce, checked: true),
-         ShoppingItem(name: "Salad", category: Category.produce),
-         ShoppingItem(name: "Eggs", category: Category.dairy),
-         ShoppingItem(name: "Rice", category: Category.grains),
-         ShoppingItem(name: "Spaghetti", category: Category.grains, checked: true)]
-    }
+    static var shopping: [ShoppingItem] { [] }
 }
 
 
@@ -128,6 +148,17 @@ enum SeedData {
 enum Region: String, CaseIterable, Hashable {
     case europe = "Europe", asia = "Asia", africa = "Africa"
     case northAmerica = "North America", southAmerica = "South America", oceania = "Oceania"
+
+    var sketchMapAsset: String? {
+        switch self {
+        case .europe: return "EuropeMap"
+        case .asia: return "AsiaMap"
+        case .africa: return "AfricaMap"
+        case .southAmerica: return "SouthAmericaMap"
+        case .northAmerica: return "NorthAmericaMap"
+        case .oceania: return "OceaniaMap"
+        }
+    }
 
     var symbol: String {
         switch self {

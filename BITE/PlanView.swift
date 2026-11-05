@@ -84,12 +84,17 @@ struct PlanView: View {
             HStack {
                 Text("\(meal.rawValue):").font(.system(size: 18, weight: .bold))
                 Spacer()
-                Button { pickerMeal = meal } label: {
-                    Label("Add \(meal.rawValue)", systemImage: "plus")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 12).padding(.vertical, 7)
-                        .background(Capsule().fill(Color.biteGreen))
+                if items.count < meal.dailyLimit {
+                    Button { pickerMeal = meal } label: {
+                        Label("Add \(meal.rawValue)", systemImage: "plus")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12).padding(.vertical, 7)
+                            .background(Capsule().fill(Color.biteGreen))
+                    }
+                } else {
+                    Text("\(items.count)/\(meal.dailyLimit)")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
             .frame(height: 34)

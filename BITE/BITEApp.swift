@@ -11,6 +11,10 @@ import SwiftUI
 struct BITEApp: App {
     @StateObject private var app = AppState()
 
+    init() {
+        PantryNotifications.configureForegroundDelivery()
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -22,6 +26,7 @@ struct BITEApp: App {
             }
             .environmentObject(app)
             .preferredColorScheme(.light)
+            .task { await app.refreshRecipes() }
         }
     }
 }

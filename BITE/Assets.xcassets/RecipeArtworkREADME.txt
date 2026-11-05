@@ -1,0 +1,1 @@
+All recipe illustrations were procedurally drawn for BITE! in this project from vector shapes using Pillow. No third-party photographs or web images are embedded. These illustrations are not verified photographs of dishes. Dynamic user recipes use an in-app fallback.

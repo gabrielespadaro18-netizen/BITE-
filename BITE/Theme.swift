@@ -1,9 +1,9 @@
 import SwiftUI
 
 extension ShapeStyle where Self == Color {
-    static var biteGreen: Color { Color(red: 0.39, green: 0.77, blue: 0.40) }
+    static var biteGreen: Color { Color(red: 52/255, green: 199/255, blue: 89/255) }
     static var biteDark: Color { Color(red: 0.21, green: 0.27, blue: 0.19) }
-    static var biteMint: Color { Color(red: 0.80, green: 0.94, blue: 0.82) }
+    static var biteMint: Color { Color(red: 195/255, green: 245/255, blue: 208/255) }
     static var biteRed: Color { Color(red: 0.89, green: 0.30, blue: 0.27) }
 }
 

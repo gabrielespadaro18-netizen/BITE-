@@ -24,7 +24,7 @@ struct ProfileView: View {
                     Text(initial).font(.system(size: 60, weight: .black)).foregroundStyle(Color.biteDark)
                 }
                 Spacer(minLength: 18)
-                Text(app.profile.name).font(.system(size: 24, weight: .bold))
+                Text(app.profile.name.isEmpty ? "BITE! guest" : app.profile.name).font(.system(size: 24, weight: .bold))
                 Spacer(minLength: 48)
 
                 Text("Personal information:")
@@ -47,7 +47,25 @@ struct ProfileView: View {
                     }
                 }
                 .background(CardBackground(radius: 18))
+                NavigationLink {
+                    PantryNotificationsView()
+                } label: {
+                    Label("Notifications", systemImage: "bell.badge")
+                        .foregroundStyle(Color.biteGreen)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 16)
+                }
                 Spacer(minLength: 28)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Recipe catalog").font(.headline)
+                    Text(app.syncMessage).font(.footnote).foregroundStyle(.secondary)
+                    Button("Refresh from Airtable") {
+                        Task { await app.refreshRecipes() }
+                    }
+                    .font(.subheadline).foregroundStyle(Color.biteGreen)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 14)
             }
             .padding(.horizontal, 20)
         }
@@ -56,6 +74,7 @@ struct ProfileView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("Redo the questions", systemImage: "arrow.counterclockwise") {
+                        app.profile.skippedOnboarding = false
                         app.profile.onboarded = false
                     }
                     Button("Reset all data", systemImage: "trash", role: .destructive) { confirmReset = true }
